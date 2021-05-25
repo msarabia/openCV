@@ -11,7 +11,7 @@ class MainActivity : AppCompatActivity(), CameraBridgeViewBase.CvCameraViewListe
     val TAG = "Ejemplo OCV"
 
     lateinit var cameraView: CameraBridgeViewBase
-    val loaderCallback: BaseLoaderCallback  = object :BaseLoaderCallback(baseContext){
+    val loaderCallback: BaseLoaderCallback  = object :BaseLoaderCallback(this){
         override fun onManagerConnected(status: Int) {
             when(status){
                 LoaderCallbackInterface.SUCCESS-> {
@@ -53,7 +53,13 @@ class MainActivity : AppCompatActivity(), CameraBridgeViewBase.CvCameraViewListe
 
     override fun onResume() {
         super.onResume()
-        OpenCVLoader.initAsync(OpenCVLoader.OPENCV_VERSION_2_4_13,this, loaderCallback)
+        if (!OpenCVLoader.initDebug()) {
+            Log.d(TAG, "Internal OpenCV library not found. Using OpenCV Manager for initialization");
+            OpenCVLoader.initAsync(OpenCVLoader.OPENCV_VERSION_2_4_13,this, loaderCallback)
+        } else {
+            Log.d(TAG, "OpenCV library found inside package. Using it!");
+            loaderCallback.onManagerConnected(LoaderCallbackInterface.SUCCESS);
+        }
     }
 
     override fun onDestroy() {
